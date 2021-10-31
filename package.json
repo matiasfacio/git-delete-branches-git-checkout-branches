@@ -1,0 +1,8 @@
+{
+  "name": "gitbranch",
+  "version": "1.0.0",
+  "description": "deleting branches on git",
+  "main": "index.js",
+  "author": "matias facio",
+  "license": "MIT"
+}
