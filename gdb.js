@@ -20,7 +20,6 @@ exec("git branch", (error, stdout, stderr) => {
       return value.replace(/\n/, "").replace("*", "");
     })
     .filter((value) => value !== "");
-  console.log(newbranch);
 
   inquirer
     .prompt([
