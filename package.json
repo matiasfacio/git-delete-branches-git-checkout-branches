@@ -7,5 +7,8 @@
   "license": "MIT",
   "dependencies": {
     "inquirer": "^8.2.0"
+  },
+  "bin": {
+    "execute": "gitdeletebranch.js"
   }
 }
