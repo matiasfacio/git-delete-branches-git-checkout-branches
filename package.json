@@ -2,7 +2,10 @@
   "name": "gitbranch",
   "version": "1.0.0",
   "description": "deleting branches on git",
-  "main": "index.js",
+  "main": "gitdeletebranch.js",
   "author": "matias facio",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "inquirer": "^8.2.0"
+  }
 }
