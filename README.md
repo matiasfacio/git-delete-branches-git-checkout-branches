@@ -1,6 +1,6 @@
-# delete-git-branches / git-checkout-branches
+# git-delete-branches / git-checkout-branches
 
-Display all the git branches available and help you to delete them by choosing them with your space bar and then confirm with enter.
+Display all the git branches available and helps you to delete them with a checkbox using the space bar to select and then confirm with enter.
 It won't allow you to delete main or master branches.
 The regex needs to be more tested so if you find an error, please let me know!
 It is node file that uses inquirer package.
