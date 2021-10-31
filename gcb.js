@@ -25,27 +25,20 @@ exec("git branch", (error, stdout, stderr) => {
       {
         type: "checkbox",
         name: "branches",
-        message: "which branches do you want to delete?",
+        message: "which branches do you want to checkout",
         choices: filteredNewBranch,
       },
     ])
     .then((answers) =>
-      exec(`git branch -D ${answers.branches}`, (error, stdout, stderr) => {
+      exec(`git checkout ${answers.branches}`, (error, stdout, stderr) => {
         if (error) {
           console.log("sorry, there was an error");
         }
         if (stderr) {
-          if (
-            answers.branches.includes("main") ||
-            answers.branches.includes("master")
-          ) {
-            console.error(`you cannot delete ${answers.branches}`);
-            return;
-          }
-          console.error(stderr, " > are you currently on this branch ?");
+          console.error(stderr);
         }
-        if (stdout) {
-          console.log("Successful:", stdout);
+        if (stdout.length > 0) {
+          console.log("Successful - you are on ", answers.branches);
         }
       })
     );
