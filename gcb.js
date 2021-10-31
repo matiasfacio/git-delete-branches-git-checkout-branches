@@ -23,7 +23,7 @@ exec("git branch", (error, stdout, stderr) => {
   inquirer
     .prompt([
       {
-        type: "checkbox",
+        type: "list",
         name: "branches",
         message: "which branches do you want to checkout",
         choices: filteredNewBranch,
