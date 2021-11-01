@@ -25,11 +25,14 @@ exec("git branch", async (error, stdout, stderr) => {
       type: "checkbox",
       name: "branches",
       message: "which branches do you want to delete?",
-      choices: [...filteredNewBranch, new inquirer.Separator()],
+      choices: [...filteredNewBranch, "-cancel-", new inquirer.Separator()],
     },
   ]);
 
-  if (selectedByUser.branches.length > 0) {
+  if (
+    selectedByUser.branches.length > 0 &&
+    !selectedByUser.branches.includes("-cancel-")
+  ) {
     const message =
       selectedByUser.branches.length === 1
         ? `Are you sure that you want to delete this branch? [${selectedByUser.branches}]`
