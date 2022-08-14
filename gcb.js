@@ -25,7 +25,7 @@ exec("git branch", (error, stdout, stderr) => {
       {
         type: "list",
         name: "branches",
-        message: "which branches do you want to checkout",
+        message: "which branch do you want to checkout",
         choices: filteredNewBranch,
       },
     ])
