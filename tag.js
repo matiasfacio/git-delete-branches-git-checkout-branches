@@ -4,6 +4,8 @@ const { exec } = require("child_process");
 const inquirer = require("inquirer");
 
 const environment = ['dev', 'stage']
+
+const CANCEL = '-cancel-'
 const init = (pushTag, getDesiredEnvironment, buildPartialTagName, buildTag, getConfirmation, createTag) =>
      exec("git branch --show-current", async (error, stdout, stderr) => {
         if (error) {
@@ -16,6 +18,11 @@ const init = (pushTag, getDesiredEnvironment, buildPartialTagName, buildTag, get
         }
         const currentBranch = stdout.replace(/(\n$)/gm, "");
         const envToDeployTo = await getDesiredEnvironment()
+
+        if (envToDeployTo.environments === CANCEL) {
+            console.log("tag creation aborted")
+            return;
+        }
         const partialTagName = buildPartialTagName(envToDeployTo.environments, currentBranch);
 
         await getVersionOrDefault(partialTagName, async (value) =>{
@@ -54,13 +61,14 @@ const pushTag = (tag) => exec(`git push origin ${tag}`, (error, stdout, stderr) 
     console.log("tag pushed successfully")
 })
 
+
 const getDesiredEnvironment = async ()=> {
     return inquirer.prompt([
         {
             type: "list",
             name: "environments",
             message: "Choose environment",
-            choices: environment,
+            choices: [...environment, CANCEL],
         },
     ]);
 }
