@@ -8,7 +8,7 @@ const environment = ['dev', 'stage']
 const CANCEL = '-cancel-'
 
 
-const init = async (getCurrentBranch, pushTag, getDesiredEnvironment, buildPartialTagName, buildTag, getConfirmation, createTag, getVersionOrDefault) => {
+const init = async () => {
     let currentBranch;
     await getCurrentBranch((val) => currentBranch = val)
     const envToDeployTo = await getDesiredEnvironment()
@@ -26,13 +26,27 @@ const init = async (getCurrentBranch, pushTag, getDesiredEnvironment, buildParti
 
         if (confirm.accepted) {
             createTag(tag, ()=> pushTag(tag))
-        } else {
-            console.log(colors.fg.red,"tag creation aborted")
+            return
         }
+        const customTagResponse = await generateCustomTag()
+
+        if(customTagResponse.custom){
+            createTag(customTagResponse.custom, ()=> pushTag(customTagResponse.custom))
+            return
+        }
+        console.log(colors.fg.red,"tag creation aborted")
     }
 
     await getVersionOrDefault(partialTagName, handleTagCreation)
 }
+
+const generateCustomTag = () => inquirer.prompt([
+    {
+        type: "input",
+        name: "custom",
+        message: "Custom tag: ",
+    },
+]);
 
 const getCurrentBranch = async (cb) => exec("git branch --show-current", async (error, stdout, stderr) => {
         if (error) {
@@ -125,5 +139,5 @@ const buildTag = (partialTagName, version) => {
     return `${partialTagName}_${version}`
 }
 
-init(getCurrentBranch, pushTag, getDesiredEnvironment, buildPartialTagName, buildTag, getConfirmation, createTag, getVersionOrDefault)
+init()
 
