@@ -40,7 +40,7 @@ const getCurrentBranch = async (cb) => exec("git branch --show-current", async (
             return;
         }
         if (stderr) {
-            console.error(colors.fg.red, "stderr:", stderr);
+            console.error("stderr:", stderr);
         }
         cb(stdout.replace(/(\n$)/gm, ""))
     }
@@ -51,7 +51,7 @@ const createTag = (tag, cb) => exec(`git tag ${tag}`, (error, stdout, stderr) =>
         return;
     }
     if (stderr) {
-        console.error(colors.fg.red, "stderr:", stderr);
+        console.error("stderr:", stderr);
     }
     console.log(colors.fg.green,"tag created successfully, now pushing to origin...")
     cb()
@@ -62,7 +62,7 @@ const pushTag = (tag) => exec(`git push origin ${tag}`, (error, stdout, stderr) 
         return;
     }
     if (stderr) {
-        console.error(colors.fg.red, "stderr:", stderr);
+        console.error("stderr:", stderr);
     }
     console.log("tag pushed successfully")
 })
