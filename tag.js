@@ -4,42 +4,45 @@ const { exec } = require("child_process");
 const inquirer = require("inquirer");
 
 const environment = ['dev', 'stage']
-
 const CANCEL = '-cancel-'
-const init = (pushTag, getDesiredEnvironment, buildPartialTagName, buildTag, getConfirmation, createTag) =>
-     exec("git branch --show-current", async (error, stdout, stderr) => {
+
+
+const init = async (getCurrentBranch, pushTag, getDesiredEnvironment, buildPartialTagName, buildTag, getConfirmation, createTag) => {
+    let currentBranch;
+    await getCurrentBranch((val) => currentBranch = val)
+    const envToDeployTo = await getDesiredEnvironment()
+
+    if (envToDeployTo.environments === CANCEL) {
+        console.log("tag creation aborted")
+        return;
+    }
+
+    const partialTagName = buildPartialTagName(envToDeployTo.environments, currentBranch);
+
+    await getVersionOrDefault(partialTagName, async (value) => {
+        const tag = buildTag(partialTagName, value.version)
+        const confirm = await getConfirmation(tag)
+
+        if (confirm.accepted) {
+            createTag(tag, ()=> pushTag(tag))
+        } else {
+            console.log("tag creation aborted")
+        }
+    })
+}
+
+const getCurrentBranch = async (cb) => exec("git branch --show-current", async (error, stdout, stderr) => {
         if (error) {
             console.error(error);
             return;
         }
-
         if (stderr) {
             console.error("stderr:", stderr);
         }
-        const currentBranch = stdout.replace(/(\n$)/gm, "");
-        const envToDeployTo = await getDesiredEnvironment()
-
-        if (envToDeployTo.environments === CANCEL) {
-            console.log("tag creation aborted")
-            return;
-        }
-        const partialTagName = buildPartialTagName(envToDeployTo.environments, currentBranch);
-
-        await getVersionOrDefault(partialTagName, async (value) =>{
-            const tag = buildTag(partialTagName, value.version)
-            const confirm = await getConfirmation(tag)
-
-            if (confirm.accepted) {
-                createTag(tag, pushTag)
-            } else {
-                console.log("tag creation aborted")
-            }
-        })
-
-
-    });
-
-const createTag = (tag, pushTag) => exec(`git tag ${tag}`, (error, stdout, stderr) => {
+        cb(stdout.replace(/(\n$)/gm, ""))
+    }
+)
+const createTag = (tag, cb) => exec(`git tag ${tag}`, (error, stdout, stderr) => {
     if (error) {
         console.error(error);
         return;
@@ -48,7 +51,7 @@ const createTag = (tag, pushTag) => exec(`git tag ${tag}`, (error, stdout, stder
         console.error("stderr:", stderr);
     }
     console.log("tag created successfully")
-    pushTag(tag)
+    cb()
 })
 const pushTag = (tag) => exec(`git push origin ${tag}`, (error, stdout, stderr) => {
     if (error) {
@@ -107,7 +110,7 @@ const getVersionOrDefault = async (currentTag, cb) => {
 
 const getNextVersion =(allTags, currentTag)=>{
     const versions = allTags.filter(tag => tag.includes(currentTag))
-    console.log('Existing tags:', versions);
+    console.log('Existing tags for current branch:', versions.length ? versions : 'none');
     return versions.length > 0 ? Math.max(...versions.map(tag => parseInt(tag.split('_').pop()))) + 1 : 1
 }
 
@@ -119,5 +122,5 @@ const buildTag = (partialTagName, version) => {
     return `${partialTagName}_${version}`
 }
 
-init(pushTag, getDesiredEnvironment, buildPartialTagName, buildTag, getConfirmation, createTag)
+init(getCurrentBranch, pushTag, getDesiredEnvironment, buildPartialTagName, buildTag, getConfirmation, createTag)
 
