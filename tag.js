@@ -19,7 +19,7 @@ const init = async (getCurrentBranch, pushTag, getDesiredEnvironment, buildParti
 
     const partialTagName = buildPartialTagName(envToDeployTo.environments, currentBranch);
 
-    await getVersionOrDefault(partialTagName, async (value) => {
+    const handleTagCreation = async (value) => {
         const tag = buildTag(partialTagName, value.version)
         const confirm = await getConfirmation(tag)
 
@@ -28,7 +28,9 @@ const init = async (getCurrentBranch, pushTag, getDesiredEnvironment, buildParti
         } else {
             console.log("tag creation aborted")
         }
-    })
+    }
+
+    await getVersionOrDefault(partialTagName, handleTagCreation)
 }
 
 const getCurrentBranch = async (cb) => exec("git branch --show-current", async (error, stdout, stderr) => {
@@ -50,7 +52,7 @@ const createTag = (tag, cb) => exec(`git tag ${tag}`, (error, stdout, stderr) =>
     if (stderr) {
         console.error("stderr:", stderr);
     }
-    console.log("tag created successfully")
+    console.log("tag created successfully, now pushing to origin...")
     cb()
 })
 const pushTag = (tag) => exec(`git push origin ${tag}`, (error, stdout, stderr) => {
